@@ -34,7 +34,7 @@ public class BallController : MonoBehaviour
             else if (Input.anyKey)
             {
                 CurrentForce = CurrentForce + (ForceAddition + 3 * GameManager.Get().Player.Points) * Time.deltaTime;
-                this.transform.Rotate(new Vector3(0, 0, 15) * Time.deltaTime);
+                this.transform.Rotate(new Vector3(0, 0, 15+ GameManager.Get().Player.Points) * Time.deltaTime);
                 var points = CalculateArc();
                 for (int i = 0; i < points.Count; i++)
                 {
