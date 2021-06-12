@@ -101,6 +101,10 @@ public class BallController : MonoBehaviour
         {
             Vector2 calculatedPositon = startingPosition + direction * velocity * i * timeStepInterval;
             calculatedPositon.y += Physics2D.gravity.y / 2 * Mathf.Pow(i * timeStepInterval, 2);
+            if (calculatedPositon.y < this.transform.position.y)
+            {
+                return listOfPoints;
+            }
             listOfPoints.Add(calculatedPositon);
         }
         return listOfPoints;
