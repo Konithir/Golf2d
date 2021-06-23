@@ -6,16 +6,21 @@ using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
 {
-    private Text ScoreText;
-    private Text EndGameScoreText;
-    private Button AgainButton;
-    private GameObject EndGamePanel;
-    private GameObject UIObject;
-    private StringBuilder StringBuilder = new StringBuilder();
+    private Text ScoreText { get; set; }
+    private Text EndGameScoreText { get; set; }
+    private Button AgainButton { get; set; }
+    private GameObject EndGamePanel { get; set; }
+    private GameObject UIObject { get; set; }
+    private StringBuilder StringBuilder { get; set; }
 
     private const string ScoreString = "SCORE: ";
     private const string GameOverString = "GAME OVER!";
     private const string BestScoreString = " BEST: ";
+
+    private void Awake()
+    {
+        StringBuilder = new StringBuilder();
+    }
 
     public void InstantiateUI(GameObject ui)
     {
