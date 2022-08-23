@@ -11,7 +11,7 @@ public class BallController : MonoBehaviour
     private const int DotNumber = 20;  
     private const int MaxForce = 200;
     private const float ForceAddition = 100f;
-    [SerializeField]
+
     private float CurrentForce;
 
     private bool ShootStarted = false;
@@ -30,6 +30,10 @@ public class BallController : MonoBehaviour
         Rigidbody2D = GetComponent<Rigidbody2D>();
     }
 
+    private void Update()
+    {
+        BallUpdate();
+    }
 
     private void InitializeDots()
     {

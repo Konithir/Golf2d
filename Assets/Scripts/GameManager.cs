@@ -5,10 +5,37 @@ using UnityEngine;
 public class GameManager : MonoBehaviour
 {
     private static GameManager singleton;
-    public ResourcesManager ResourcesManager { get; set; }
-    public UIManager UIManager { get; set; }
-    public BallController BallController { get; set; }
-    public PlayerModel Player { get; set; }
+
+    [Header("References")]
+
+    [SerializeField]
+    private ResourcesManager _resourcesManager;
+
+    [SerializeField]
+    private UIManager _uiManager;
+
+    [SerializeField]
+    private PlayerModel _player;
+
+    private BallController BallController;
+
+    public PlayerModel Player
+    {
+        get { return _player; }
+        set { _player = value; }
+    }
+
+    public ResourcesManager ResourcesManager
+    {
+        get { return _resourcesManager; }
+        set { _resourcesManager = value; }
+    }
+
+    public UIManager UIManager
+    {
+        get { return _uiManager; }
+        set { _uiManager = value; }
+    }
 
     public static GameManager Get()
     {
@@ -18,23 +45,30 @@ public class GameManager : MonoBehaviour
     private void Awake()
     {
         singleton = this;
-        ResourcesManager = gameObject.AddComponent<ResourcesManager>();
-        UIManager = gameObject.AddComponent<UIManager>();
         Player = new PlayerModel();
     }
 
     private void Start()
     {
-        Camera.main.aspect = 16f / 9f;
-        UIManager.InstantiateUI(ResourcesManager.GetPrefab(PrefabEnum.UICanvas));
-        UIManager.UpdateScore(Player.Points);
-        BallController = Instantiate(ResourcesManager.GetPrefab(PrefabEnum.Ball),Vector3.zero,Quaternion.identity).AddComponent<BallController>();
-        BallController.gameObject.name = "Ball";
-        BallController.StartRound();
+        GameInitialization();
     }
 
-    private void Update()
+    private void GameInitialization()
     {
-        BallController.BallUpdate();
+        Camera.main.aspect = 16f / 9f;
+
+        UIManager.UpdateScore(Player.Points);
+
+        BallController = Instantiate(ResourcesManager.GetPrefab(PrefabEnum.Ball), Vector3.zero, Quaternion.identity).AddComponent<BallController>();
+        BallController.gameObject.name = "Ball";
+
+        Player.Reset();
+
+        StartRound();
+    }
+
+    public void StartRound()
+    {
+        BallController.StartRound();
     }
 }
