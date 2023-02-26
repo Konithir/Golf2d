@@ -9,15 +9,13 @@ public class GameManager : MonoBehaviour
     [Header("References")]
 
     [SerializeField]
-    private ResourcesManager _resourcesManager;
-
-    [SerializeField]
     private UIManager _uiManager;
 
     [SerializeField]
     private PlayerModel _player;
 
-    private BallController BallController;
+    [SerializeField]
+    private GameController _gameController;
 
     public PlayerModel Player
     {
@@ -25,16 +23,15 @@ public class GameManager : MonoBehaviour
         set { _player = value; }
     }
 
-    public ResourcesManager ResourcesManager
-    {
-        get { return _resourcesManager; }
-        set { _resourcesManager = value; }
-    }
-
     public UIManager UIManager
     {
         get { return _uiManager; }
         set { _uiManager = value; }
+    }
+
+    public GameController GameController
+    {
+        get { return _gameController; }
     }
 
     public static GameManager Get()
@@ -45,7 +42,6 @@ public class GameManager : MonoBehaviour
     private void Awake()
     {
         singleton = this;
-        Player = new PlayerModel();
     }
 
     private void Start()
@@ -57,18 +53,8 @@ public class GameManager : MonoBehaviour
     {
         Camera.main.aspect = 16f / 9f;
 
-        UIManager.UpdateScore(Player.Points);
-
-        BallController = Instantiate(ResourcesManager.GetPrefab(PrefabEnum.Ball), Vector3.zero, Quaternion.identity).AddComponent<BallController>();
-        BallController.gameObject.name = "Ball";
+        UIManager.ScoreController.UpdateScore(Player.Points);
 
         Player.Reset();
-
-        StartRound();
-    }
-
-    public void StartRound()
-    {
-        BallController.StartRound();
     }
 }

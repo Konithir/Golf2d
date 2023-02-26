@@ -4,66 +4,54 @@ using UnityEngine;
 
 public class BallController : MonoBehaviour
 {
-    private const float BallStartingPositonMin = -8f;
-    private const float BallStartingPositonMax = -6f;
-    private const float FlagStartingPositionMin = 3f;
-    private const float FlagStartingPositionMax = 8f;
-    private const int DotNumber = 20;  
-    private const int MaxForce = 200;
-    private const float ForceAddition = 100f;
+    [SerializeField]
+    private Rigidbody2D _rigidbody2D;
 
-    private float CurrentForce;
+    [SerializeField]
+    private List<GameObject> _dotsList;
 
-    private bool ShootStarted = false;
-    private bool GameReady = false;
+    [SerializeField]
+    private GameObject _dotObj;
 
-    private List<GameObject> DotsList = new List<GameObject>();
-    private GameObject Flag;
-    private Rigidbody2D Rigidbody2D;
+    private const int DOT_NUMBER = 20;  
+    private const int MAX_FORCE = 200;
+    private const float FORCE_ADDITION = 100f;
+
+    private float _currentForce;
+
+    private bool _shootStarted = false;
+    private bool _gameReady = false;
+
+    public bool GameReady
+    {
+        get { return _gameReady; }
+        set { _gameReady = value; }
+    }
 
 
     #region Private Methods
-
-    private void Awake()
-    {
-        InitializeDots();
-        Rigidbody2D = GetComponent<Rigidbody2D>();
-    }
 
     private void Update()
     {
         BallUpdate();
     }
 
-    private void InitializeDots()
-    {
-        var DotParent = new GameObject();
-        DotParent.name = nameof(DotParent);
-        for (int i = 0; i < DotNumber; i++)
-        {
-            var dot = Instantiate(GameManager.Get().ResourcesManager.GetPrefab(PrefabEnum.Dot), Vector3.zero, Quaternion.identity);
-            dot.name = nameof(dot);
-            dot.transform.SetParent(DotParent.transform);
-            DotsList.Add(dot);
-        }
-    }
-
     private void Shoot()
     {
-        ShootStarted = false;
-        Rigidbody2D.AddForce(this.transform.up * CurrentForce);
-        foreach (GameObject dot in DotsList)
+        _shootStarted = false;
+        _rigidbody2D.AddForce(this.transform.up * _currentForce);
+        foreach (GameObject dot in _dotsList)
         {
             dot.SetActive(false);
         }
-        GameReady = false;
+        _gameReady = false;
         Invoke(nameof(Lose), 3f);
     }
 
     private void Lose()
     {
         StopBall();
-        GameManager.Get().UIManager.GameOver(GameManager.Get().Player.Points);
+        GameManager.Get().UIManager.EndGamePanel.GameOver(GameManager.Get().Player.Points);
     }
 
     private List<Vector2> CalculateArc()
@@ -76,7 +64,7 @@ public class BallController : MonoBehaviour
         Vector2 direction = transform.up;
         Vector2 startingPosition = transform.position;
 
-        var velocity = CurrentForce / Rigidbody2D.mass * Time.fixedDeltaTime;
+        var velocity = _currentForce / _rigidbody2D.mass * Time.fixedDeltaTime;
 
         for (int i = 0; i < maxSteps; i++)
         {
@@ -91,72 +79,52 @@ public class BallController : MonoBehaviour
         return listOfPoints;
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
-    {
-        Score();
-        StartRound();
-    }
-
     #endregion
     #region Public Methods
 
-    public void StartRound()
-    {
-        if (!Flag)
-        {
-            Flag = Instantiate(GameManager.Get().ResourcesManager.GetPrefab(PrefabEnum.Flag), Vector3.zero, Quaternion.identity);
-            Flag.name = nameof(Flag);
-        }
-        Flag.transform.position = new Vector3(Random.Range(FlagStartingPositionMin,FlagStartingPositionMax), -4.08f, 0);
-        this.transform.position = new Vector3(Random.Range(BallStartingPositonMin,BallStartingPositonMax), -3.3f, 0);
-        StopBall();
-        this.transform.eulerAngles = new Vector3(0, 0, -90);
-        this.gameObject.SetActive(true);
-        GameReady = true;
-    }
+  
 
     public void StopBall()
     {
-        if(Rigidbody2D)
+        if(_rigidbody2D)
         {
-            Rigidbody2D.velocity = Vector3.zero;
-            Rigidbody2D.angularVelocity = 0;
+            _rigidbody2D.velocity = Vector3.zero;
+            _rigidbody2D.angularVelocity = 0;
         }  
     }
 
-    public void Score()
+    public void StopLoseGameInvoke()
     {
-        GameManager.Get().Player.Points++;
-        GameManager.Get().UIManager.UpdateScore(GameManager.Get().Player.Points);
         CancelInvoke();
     }
 
-
     public void BallUpdate()
     {
-        if (GameReady)
+        if (_gameReady)
         {
-            if (Input.anyKey && !ShootStarted)
+            if (Input.anyKey && !_shootStarted)
             {
-                CurrentForce = 0;
-                ShootStarted = true;
+                _currentForce = 0;
+                _shootStarted = true;
             }
             else if (Input.anyKey)
             {
-                CurrentForce += (ForceAddition + 3 * GameManager.Get().Player.Points) * Time.deltaTime;
-                this.transform.Rotate(new Vector3(0, 0, 15 + GameManager.Get().Player.Points) * Time.deltaTime);
+                _currentForce += (FORCE_ADDITION + 3 * GameManager.Get().Player.Points) * Time.deltaTime;
+                transform.Rotate(new Vector3(0, 0, 15 + GameManager.Get().Player.Points) * Time.deltaTime);
+
                 var points = CalculateArc();
+
                 for (int i = 0; i < points.Count; i++)
                 {
-                    DotsList[i].transform.position = points[i];
-                    DotsList[i].SetActive(true);
+                    _dotsList[i].transform.position = points[i];
+                    _dotsList[i].SetActive(true);
                 }
-                if (CurrentForce >= MaxForce)
+                if (_currentForce >= MAX_FORCE)
                 {
                     Shoot();
                 }
             }
-            else if (!Input.anyKey && ShootStarted)
+            else if (!Input.anyKey && _shootStarted)
             {
                 Shoot();
             }
